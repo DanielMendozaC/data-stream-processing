@@ -1,7 +1,4 @@
-"""
-Simple FastAPI stock consumer with feature engineering.
-Runs consumer in background, calculates signals, that's it.
-"""
+# consumer_service.py
 
 import os
 import threading
