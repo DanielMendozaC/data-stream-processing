@@ -1,0 +1,13 @@
+# requirements.txt
+
+# pip install alpaca-py kafka-python
+# pip install alpaca-trade-api
+# pip install confluent-kafka python-dotenv
+
+
+fastapi==0.104.1
+uvicorn==0.24.0
+confluent-kafka==2.3.0
+alpaca-trade-api==3.0.0
+python-dotenv==1.0.0
+pytz==2023.3
