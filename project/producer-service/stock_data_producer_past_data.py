@@ -152,8 +152,11 @@ def run_producer_microservice(topic_name):
     # start_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
     # end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    start_date = '2024-11-14T09:30:00Z'
-    end_date = '2024-11-14T16:00:00Z'     # Friday Nov 14, 
+    # start_date = '2024-11-17T09:30:00-05:00'  # Monday market open (EST)
+    # end_date = '2024-11-21T16:00:00-05:00'    # Friday market close (EST)
+
+    start_date = '2024-11-11'  # Monday Nov 17
+    end_date = '2024-11-12'    # Friday Nov 21
 
     bars = alpaca_api.get_bars(symbols, '1Min', start=start_date, end=end_date).df
     
@@ -190,7 +193,7 @@ def run_producer_microservice(topic_name):
             # Pause for a moment to simulate a real-time stream
             # time.sleep(1)
             
-            time.sleep(0.1)  # Stream at 10x speed (or use 1 for real-time)
+            # time.sleep(0.1)  # Stream at 10x speed (or use 1 for real-time)
 
         producer.flush()
         print("Done!")

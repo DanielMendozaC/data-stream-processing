@@ -41,6 +41,35 @@ SCHEMA = """
 buffers = defaultdict(list)
 signals = []
 
+def calculate_signal_for_symbol(symbol):
+    """Helper to calculate signal from buffer"""
+    if symbol not in buffers or len(buffers[symbol]) < 14:
+        return None
+    
+    df = pd.DataFrame(buffers[symbol])
+    closes = df['close'].values
+    
+    sma_20 = closes[-20:].mean() if len(closes) >= 20 else None
+    sma_50 = closes[-50:].mean() if len(closes) >= 50 else None
+    rsi = calculate_rsi(pd.Series(closes), 14)
+    
+    signal = 'HOLD'
+    if sma_20 and sma_50:
+        if sma_20 > sma_50 and rsi and rsi < 30:
+            signal = 'BUY'
+        elif sma_20 < sma_50 and rsi and rsi > 70:
+            signal = 'SELL'
+    
+    return {
+        'symbol': symbol,
+        'timestamp': buffers[symbol][-1]['timestamp'],
+        'signal': signal,
+        'close': float(closes[-1]),
+        'sma_20': float(sma_20) if sma_20 else None,
+        'sma_50': float(sma_50) if sma_50 else None,
+        'rsi': float(rsi) if rsi else None,
+        'volume': int(buffers[symbol][-1]['volume'])
+    }
 
 def calculate_rsi(prices, period=14):
     """Calculate RSI"""

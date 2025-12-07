@@ -23,8 +23,9 @@ Real-time stock market data pipeline using Kafka, Avro schemas, and FastAPI.
 
 **Alpaca API:**
 1. Go to https://app.alpaca.markets/
-2. Login → Settings → API Keys
-3. Copy Key & Secret
+Create Alpaca Keys when log in -> Home, you will see a dashboard, scroll down, on the right side,
+you'll see API keys. Add API key and secrets to the .env file.
+
 
 **Confluent Cloud:**
 1. Go to https://confluent.cloud/
@@ -39,8 +40,11 @@ cp .env.example .env
 # Edit .env with your credentials
 ```
 
-### 3. Install Dependencies (for producer script)
+### 3. Install Dependencies
+Create a Python 3.10 environment:
 ```bash
+conda create -n finance-env python=3.10
+conda activate finance-env
 pip install -r requirements.txt
 ```
 
@@ -79,15 +83,21 @@ curl http://localhost:8000/health
 # Response: {"status": "running", "messages_sent": 42}
 ```
 
+### Check Health Consumer
+```bash
+curl http://localhost:8001/health
+# Response: {"total": 150, "signals": [...]}
+```
+
 ### Get Latest Trading Signals
 ```bash
-curl http://localhost:8001/signals?limit=10
+curl http://localhost:8001/signals
 # Response: {"total": 150, "signals": [...]}
 ```
 
 ### Get Signals for Specific Stock
 ```bash
-curl http://localhost:8001/signals/AAPL?limit=5
+curl http://localhost:8001/signals/AAPL
 ```
 
 ## Data Flow
@@ -114,6 +124,4 @@ Open: Monday-Friday, 9:30 AM - 4:00 PM ET
 Closed: Nights, weekends, holidays
 
 
-Create Alpaca Keys when log in -> Home, you will see a dashboard, scroll down, on the right side,
-you'll see API keys, get your own. Add API key and secrets to the .env file.
 

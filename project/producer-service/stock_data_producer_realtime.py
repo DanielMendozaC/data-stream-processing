@@ -7,10 +7,12 @@ import os
 import time
 import socket
 import sys
+import requests
 import alpaca_trade_api as tradeapi
 from datetime import datetime
 import pytz
 
+from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.schema_registry import topic_record_subject_name_strategy
@@ -82,6 +84,41 @@ def get_producer():
 app = FastAPI()
 message_count = 0
 
+def create_topic_if_not_exists(topic_name):
+    """Creates Kafka topic if it doesn't exist"""
+    conf = {
+        'bootstrap.servers': os.environ['CONFLUENT_SERVER'],
+        'security.protocol': 'SASL_SSL',
+        'sasl.mechanism': 'PLAIN',
+        'sasl.username': os.environ['CONFLUENT_API_KEY'],
+        'sasl.password': os.environ['CONFLUENT_API_SECRET'],
+    }
+    
+    admin_client = AdminClient(conf)
+    
+    # Check if topic exists
+    topics = admin_client.list_topics(timeout=10).topics
+    
+    if topic_name not in topics:
+        print(f"Creating topic '{topic_name}'...")
+        new_topic = NewTopic(topic_name, num_partitions=2)
+        admin_client.create_topics([new_topic])
+        print(f"Topic '{topic_name}' created!")
+    else:
+        print(f"Topic '{topic_name}' already exists")
+
+def set_schema_compatibility():
+    """Set schema compatibility to BACKWARD (optional)"""    
+    sr_url = os.getenv('SCHEMA_REGISTRY_URL')
+    sr_auth = (os.getenv('SR_API_KEY'), os.getenv('SR_API_SECRET'))
+    
+    # Set global compatibility
+    requests.put(
+        f"{sr_url}/config",
+        json={"compatibility": "BACKWARD"},
+        auth=sr_auth
+    )
+    print("Schema compatibility set to BACKWARD")
 
 def is_market_open():
     """Check if US market is open"""
@@ -178,6 +215,8 @@ def run_realtime_producer(topic_name):
 @app.on_event("startup")
 async def startup():
     topic_name = 'stocks.raw.avro'
+    create_topic_if_not_exists(topic_name)  
+    set_schema_compatibility()
     threading.Thread(target=run_realtime_producer, args=(topic_name,), daemon=True).start()
 
 @app.get("/health")
