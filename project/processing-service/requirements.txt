@@ -1,4 +1,5 @@
 # Requirements.txt
+requests
 fastapi==0.104.1
 uvicorn==0.24.0
 confluent-kafka==2.3.0
@@ -7,4 +8,4 @@ python-dotenv==1.0.0
 pytz==2023.3
 fastavro
 pandas
-apache-flink==1.18.0
+apache-flink==1.19.0

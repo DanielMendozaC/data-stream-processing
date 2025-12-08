@@ -80,7 +80,7 @@ def get_producer():
     avro_serializer = AvroSerializer(
         schema_registry_client,
         avro_schema_str,
-        conf={'subject.name.strategy': topic_record_subject_name_strategy}
+        # conf={'subject.name.strategy': topic_record_subject_name_strategy}
     )
     
     producer_conf = {
@@ -155,8 +155,8 @@ def run_producer_microservice(topic_name):
     # start_date = '2024-11-17T09:30:00-05:00'  # Monday market open (EST)
     # end_date = '2024-11-21T16:00:00-05:00'    # Friday market close (EST)
 
-    start_date = '2024-11-11'  # Monday Nov 17
-    end_date = '2024-11-12'    # Friday Nov 21
+    start_date = '2024-12-02T09:30:00-05:00'  # Monday Nov 17
+    end_date = '2024-12-02T10:10:00-05:00'    # Friday Nov 21
 
     bars = alpaca_api.get_bars(symbols, '1Min', start=start_date, end=end_date).df
     
@@ -209,5 +209,6 @@ def run_producer_microservice(topic_name):
 
 
 if __name__ == '__main__':
-    topic_name = 'stocks.raw.avro'
+    # topic_name = 'stocks.raw.avro'
+    topic_name = 'stocks.raw.v3'
     run_producer_microservice(topic_name)

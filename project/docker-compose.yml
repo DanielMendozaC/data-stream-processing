@@ -1,4 +1,4 @@
-# docker-compose.yml
+# # docker-compose.yml
 
 version: '3.8'
 
@@ -8,8 +8,14 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
+
+  processing:
+    build: ./processing-service
+    ports:
+      - "8002:8002"
+    env_file: .env
     depends_on:
-      - kafka
+      - producer
 
   consumer:
     build: ./consumer-service
@@ -17,23 +23,45 @@ services:
       - "8001:8001"
     env_file: .env
     depends_on:
-      - kafka
+      - processing
 
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+
+
+# version: '3.8'
+
+# services:
+#   producer:
+#     build: ./producer-service
+#     ports:
+#       - "8000:8000"
+#     env_file: .env
+#     depends_on:
+#       - kafka
+
+#   consumer:
+#     build: ./consumer-service
+#     ports:
+#       - "8001:8001"
+#     env_file: .env
+#     depends_on:
+#       - kafka
+
+#   kafka:
+#     image: confluentinc/cp-kafka:7.5.0
+#     environment:
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+#       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#     ports:
+#       - "9092:9092"
+#     depends_on:
+#       - zookeeper
+
+#   zookeeper:
+#     image: confluentinc/cp-zookeeper:7.5.0
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
