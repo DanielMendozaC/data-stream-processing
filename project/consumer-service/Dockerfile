@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 8001
 
-CMD ["uvicorn", "consumer_service:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "consumer_api:app", "--host", "0.0.0.0", "--port", "8001"]

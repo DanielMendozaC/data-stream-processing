@@ -1,3 +1,4 @@
+# requirements txt consumer service
 fastapi==0.104.1
 uvicorn==0.24.0
 confluent-kafka==2.3.0
@@ -6,3 +7,5 @@ python-dotenv==1.0.0
 pytz==2023.3
 fastavro
 pandas
+google-cloud-bigquery==3.13.0
+db-dtypes==1.1.1 

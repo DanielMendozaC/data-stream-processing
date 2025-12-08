@@ -23,6 +23,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 import threading
 
+message_count = 0
+message_count_lock = threading.Lock()
+
 # Load credentials
 load_dotenv()
 
@@ -159,43 +162,51 @@ def run_realtime_producer(topic_name):
                 print(f" Market OPEN, Fetching data... [{datetime.now().strftime('%H:%M:%S')}]")
                 
                 try:
-                    # Get most recent 1-minute bar
-                    bars = alpaca_api.get_bars(
-                        symbols, 
-                        '1Min', 
-                        limit=1  # Just latest bar
-                    ).df
-                    
-                    if not bars.empty:
-                        for index, row in bars.iterrows():
-                            message = {
-                                'symbol': str(row['symbol']),
-                                'timestamp': str(index),
-                                'open': float(row['open']),
-                                'high': float(row['high']),
-                                'low': float(row['low']),
-                                'close': float(row['close']),
-                                'volume': int(row['volume']),
-                                'trade_count': int(row['trade_count']),
-                                'vwap': float(row['vwap'])
-                            }
+                    # Get most recent 1-minute bar for EACH symbol
+                    for symbol in symbols:
+                        try:
+                            bars = alpaca_api.get_bars(
+                                symbol,  # Fetch ONE symbol at a time
+                                '1Min', 
+                                limit=1
+                            ).df
                             
-                            producer.produce(
-                                topic=topic_name,
-                                key=message['symbol'],
-                                value=message,
-                                on_delivery=delivery_report
-                            )
+                            if not bars.empty:
+                                for index, row in bars.iterrows():
+                                    message = {
+                                        'symbol': symbol,  # Use symbol directly
+                                        'timestamp': str(index),
+                                        'open': float(row['open']),
+                                        'high': float(row['high']),
+                                        'low': float(row['low']),
+                                        'close': float(row['close']),
+                                        'volume': int(row['volume']),
+                                        'trade_count': int(row['trade_count']),
+                                        'vwap': float(row['vwap'])
+                                    }
+                                    
+                                    producer.produce(
+                                        topic=topic_name,
+                                        key=message['symbol'],
+                                        value=message,
+                                        on_delivery=delivery_report
+                                    )
+                                    
+                                    with message_count_lock:  # Thread-safe increment
+                                        message_count += 1
+                                
+                                print(f"   ✓ Sent {symbol} data")
+                            else:
+                                print(f"   ✗ No data for {symbol}")
+                                
+                        except Exception as e:
+                            print(f"   ✗ Error fetching {symbol}: {e}")
+                    
+                    producer.poll(0)  # Poll once after all symbols
+                    print()  # Empty line for readability
 
-                            message_count += 1 
-                        
-                        producer.poll(0)
-                        print(f"   Sent {len(bars)} bars\n")
-                    else:
-                        print("   No new data available\n")
-                
                 except Exception as e:
-                    print(f" Error fetching data: {e}\n")
+                    print(f" Error in data fetch loop: {e}\n")
             
             else:
                 et = pytz.timezone('US/Eastern')
@@ -214,7 +225,8 @@ def run_realtime_producer(topic_name):
 
 @app.on_event("startup")
 async def startup():
-    topic_name = 'stocks.raw.avro'
+    # topic_name = 'stocks.raw.avro'
+    topic_name = 'stocks.raw.v3'
     create_topic_if_not_exists(topic_name)  
     set_schema_compatibility()
     threading.Thread(target=run_realtime_producer, args=(topic_name,), daemon=True).start()

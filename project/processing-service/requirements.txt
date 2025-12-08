@@ -8,4 +8,3 @@ python-dotenv==1.0.0
 pytz==2023.3
 fastavro
 pandas
-apache-flink==1.19.0

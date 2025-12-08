@@ -7,13 +7,17 @@ services:
     build: ./producer-service
     ports:
       - "8000:8000"
-    env_file: .env
+    env_file:
+      - .env
+    restart: unless-stopped
 
   processing:
     build: ./processing-service
     ports:
       - "8002:8002"
-    env_file: .env
+    env_file:
+      - .env
+    restart: unless-stopped
     depends_on:
       - producer
 
@@ -21,10 +25,11 @@ services:
     build: ./consumer-service
     ports:
       - "8001:8001"
-    env_file: .env
+    env_file:
+      - .env
+    restart: unless-stopped
     depends_on:
       - processing
-
 
 
 
