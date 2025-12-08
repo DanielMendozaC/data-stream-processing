@@ -183,17 +183,17 @@ def run_producer_microservice(topic_name):
             producer.produce(
                 topic=topic_name,
                 key=message['symbol'],
-                value=message,  # ← Just pass the dict, no JSON!
+                value=message,  
                 on_delivery=delivery_report
             )
             
             # Flush any outstanding or buffered messages to the Kafka broker.
             producer.poll(0)
             
-            # Pause for a moment to simulate a real-time stream
+            # Pause for a moment to simulate a real time stream
             # time.sleep(1)
             
-            # time.sleep(0.1)  # Stream at 10x speed (or use 1 for real-time)
+            time.sleep(0.1)  
 
         producer.flush()
         print("Done!")

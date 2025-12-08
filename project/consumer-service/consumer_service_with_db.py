@@ -55,8 +55,8 @@ stats = {
     'signals_generated': 0,
     'db_writes_success': 0,
     'db_writes_failed': 0,
-    'total_processing_time': 0,  # NEW
-    'api_response_times': []      # NEW
+    'total_processing_time': 0,  
+    'api_response_times': []     
 }
 
 
@@ -135,7 +135,7 @@ def write_signal_to_bigquery(signal_data):
         errors = bigquery_client.insert_rows_json(table_id, [row])
         
         if errors:
-            print(f"❌ BigQuery insert errors: {errors}")
+            print(f" BigQuery insert errors: {errors}")
             stats['db_writes_failed'] += 1
             return False
         else:
@@ -143,7 +143,7 @@ def write_signal_to_bigquery(signal_data):
             return True
             
     except Exception as e:
-        print(f"❌ BigQuery write error: {e}")
+        print(f" BigQuery write error: {e}")
         stats['db_writes_failed'] += 1
         return False
 
@@ -177,7 +177,7 @@ def consumer_loop():
     
     consumer = DeserializingConsumer(consumer_conf)
     consumer.subscribe(['stocks.raw.avro'])
-    print("✓ Consumer started (with BigQuery integration)")
+    print(" Consumer started (with BigQuery integration)")
     
     while True:
         msg = consumer.poll(timeout=1.0)
@@ -189,7 +189,7 @@ def consumer_loop():
             print(f"Error: {msg.error()}")
             continue
 
-        start_time = time.time()  # ← START TIMER
+        start_time = time.time()  
         
         symbol = msg.key()
         data = msg.value()
@@ -235,7 +235,6 @@ def consumer_loop():
                 'volume': int(data['volume'])
             }
             
-            # Dual write: in-memory (fast API) + BigQuery (persistent)
             signals.append(signal_data)
             stats['signals_generated'] += 1
             
@@ -247,7 +246,7 @@ def consumer_loop():
             db_status = "✓" if success else "✗"
             print(f"[{symbol}] {signal} | Close: {closes[-1]:.2f} | RSI: {rsi_str} | DB: {db_status}")
         
-        end_time = time.time()  # ← END TIMER
+        end_time = time.time()  
         processing_time_ms = (end_time - start_time) * 1000
         stats['total_processing_time'] += processing_time_ms
 
